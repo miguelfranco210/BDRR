@@ -2293,28 +2293,32 @@ code {
 
   html,
   body {
-    width: 8.5in;
-    min-height: 11in;
+    width: auto;
+    min-height: 0;
+    height: auto;
+    margin: 0;
+    padding: 0;
     background: #ffffff;
     overflow: visible;
   }
 
-  body * {
-    visibility: hidden;
-  }
-
-  .print-schedule-sheet,
-  .print-schedule-sheet * {
-    visibility: visible;
+  body > *:not(.print-schedule-sheet) {
+    display: none !important;
   }
 
   .print-schedule-sheet {
-    display: block;
-    position: absolute;
-    inset: 0;
+    display: block !important;
+    position: static;
     width: 100%;
+    margin: 0;
+    padding: 0;
     background: #ffffff;
     color: #111111;
     font-family: Arial, Helvetica, sans-serif;
+  }
+
+  .print-shift-section {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }

@@ -1705,6 +1705,16 @@ function renderPrintScheduleSheet() {
 
 function printSelectedDaySchedule() {
   renderPrintScheduleSheet();
+  const originalParent = printScheduleSheet.parentNode;
+  const originalNextSibling = printScheduleSheet.nextSibling;
+  document.body.appendChild(printScheduleSheet);
+  const restore = () => {
+    if (originalParent) {
+      originalParent.insertBefore(printScheduleSheet, originalNextSibling);
+    }
+    window.removeEventListener("afterprint", restore);
+  };
+  window.addEventListener("afterprint", restore);
   window.print();
 }
 
