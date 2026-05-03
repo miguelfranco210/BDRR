@@ -2,7 +2,7 @@ const http = require("http");
 const path = require("path");
 const crypto = require("crypto");
 const { mkdir, readFile, writeFile, rename } = require("fs/promises");
-const coordinatorPageHtml = require("./private/coordinator-page");
+const coordinatorPageHtml = require("./coordinator-page");
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.join(__dirname, "public");
