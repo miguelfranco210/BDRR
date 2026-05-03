@@ -257,18 +257,6 @@ async function writeSignups(signups) {
         body: JSON.stringify(rows)
       });
     }
-
-    const ids = rows.map((row) => row.id);
-    const deleteSearch = ids.length > 0
-      ? `?id=not.in.(${ids.join(",")})`
-      : "?id=not.is.null";
-
-    await requestSupabase(deleteSearch, {
-      method: "DELETE",
-      headers: {
-        Prefer: "return=minimal"
-      }
-    });
     return;
   }
 
@@ -1277,6 +1265,42 @@ async function handleRequest(request, response) {
 
     const signups = await readSignups();
     sendJson(response, 200, getAdminDashboard(signups));
+    return;
+  }
+
+  if (request.method === "GET" && requestUrl.pathname === "/api/admin/storage-health") {
+    if (!isAdminAuthorized(requestUrl, {}, request)) {
+      sendAdminUnauthorized(response);
+      return;
+    }
+
+    if (!useSupabaseStorage()) {
+      sendJson(response, 200, {
+        ok: true,
+        storage: "local-json",
+        supabaseConfigured: false
+      });
+      return;
+    }
+
+    try {
+      await requestSupabase("?select=id&limit=1", { method: "GET" });
+      sendJson(response, 200, {
+        ok: true,
+        storage: "supabase",
+        supabaseConfigured: true,
+        table: SUPABASE_SIGNUPS_TABLE
+      });
+    } catch (error) {
+      sendJson(response, 500, {
+        ok: false,
+        storage: "supabase",
+        supabaseConfigured: true,
+        table: SUPABASE_SIGNUPS_TABLE,
+        error: "Supabase storage check failed. Confirm SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and the signups table schema.",
+        detail: error.message
+      });
+    }
     return;
   }
 

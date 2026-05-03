@@ -42,6 +42,8 @@ The coordinator review desk is available at `http://localhost:3000/ridglan-beagl
 
 For Vercel, add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD` in Project Settings > Environment Variables, then redeploy. The Supabase service role key must stay server-side only; do not place it in frontend code.
 
+After deployment, coordinators can verify backend storage at `/api/admin/storage-health`. The endpoint is protected by the admin username/password and confirms whether the deployed app can reach the Supabase `signups` table.
+
 From the Schedule tab, choose a day from Print day and use Save Day to PDF to open the browser print dialog with a letter-size schedule sheet. Choose Save as PDF or print from that dialog.
 
 ## Public deployment notes
