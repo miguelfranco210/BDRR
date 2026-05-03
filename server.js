@@ -5,13 +5,18 @@ const { mkdir, readFile, writeFile, rename } = require("fs/promises");
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.join(__dirname, "public");
+const PRIVATE_DIR = path.join(__dirname, "private");
 const DATA_DIR = path.join(__dirname, "data");
 const SIGNUPS_FILE = process.env.SIGNUPS_FILE || path.join(DATA_DIR, "signups.json");
+const SUPABASE_URL = (process.env.SUPABASE_URL || "").replace(/\/+$/, "");
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+const SUPABASE_SIGNUPS_TABLE = process.env.SUPABASE_SIGNUPS_TABLE || "signups";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const EVENING_CLEAN_PREP_ROLE_ID = "evening-clean-prep";
 const COORDINATOR_PAGE_PATH = "/ridglan-beagle-intake-coordinator-desk";
 const COORDINATOR_HTML_PATH = "/ridglan-beagle-intake-coordinator-desk.html";
+const COORDINATOR_FILE = path.join(PRIVATE_DIR, "ridglan-beagle-intake-coordinator-desk.html");
 const THURSDAY_LOADER_CLEANUP_ROLE_ID = "thu-loader-cleanup";
 const ADMIN_STATUSES = new Set(["pending", "approved", "denied"]);
 const GENERAL_ROLE_IDS = ["yard-sitter", "loader", "crate-cleaner", "stall-monitor", "clerical-intake"];
@@ -175,6 +180,38 @@ const mimeTypes = {
 
 let signupQueue = Promise.resolve();
 
+function useSupabaseStorage() {
+  return Boolean(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY);
+}
+
+function getSupabaseTableUrl(search = "") {
+  return `${SUPABASE_URL}/rest/v1/${encodeURIComponent(SUPABASE_SIGNUPS_TABLE)}${search}`;
+}
+
+async function requestSupabase(search, options = {}) {
+  const response = await fetch(getSupabaseTableUrl(search), {
+    ...options,
+    headers: {
+      apikey: SUPABASE_SERVICE_ROLE_KEY,
+      Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
+      ...(options.body ? { "Content-Type": "application/json" } : {}),
+      ...(options.headers || {})
+    }
+  });
+
+  if (!response.ok) {
+    const message = await response.text();
+    throw new Error(`Supabase request failed (${response.status}): ${message}`);
+  }
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  const responseText = await response.text();
+  return responseText ? JSON.parse(responseText) : null;
+}
+
 function queueSignupWrite(task) {
   const nextTask = signupQueue.then(task, task);
   signupQueue = nextTask.catch(() => undefined);
@@ -182,6 +219,14 @@ function queueSignupWrite(task) {
 }
 
 async function readSignups() {
+  if (useSupabaseStorage()) {
+    const rows = await requestSupabase("?select=record&order=submitted_at.asc", {
+      method: "GET"
+    });
+
+    return Array.isArray(rows) ? rows.map((row) => row.record).filter(Boolean) : [];
+  }
+
   try {
     const content = await readFile(SIGNUPS_FILE, "utf8");
     const signups = JSON.parse(content);
@@ -196,6 +241,37 @@ async function readSignups() {
 }
 
 async function writeSignups(signups) {
+  if (useSupabaseStorage()) {
+    const rows = signups.map((signup) => ({
+      id: signup.id,
+      submitted_at: signup.submittedAt || new Date().toISOString(),
+      record: signup
+    }));
+
+    if (rows.length > 0) {
+      await requestSupabase("?on_conflict=id", {
+        method: "POST",
+        headers: {
+          Prefer: "resolution=merge-duplicates,return=minimal"
+        },
+        body: JSON.stringify(rows)
+      });
+    }
+
+    const ids = rows.map((row) => row.id);
+    const deleteSearch = ids.length > 0
+      ? `?id=not.in.(${ids.join(",")})`
+      : "?id=not.is.null";
+
+    await requestSupabase(deleteSearch, {
+      method: "DELETE",
+      headers: {
+        Prefer: "return=minimal"
+      }
+    });
+    return;
+  }
+
   await mkdir(path.dirname(SIGNUPS_FILE), { recursive: true });
   const temporaryFile = `${SIGNUPS_FILE}.${process.pid}.tmp`;
   await writeFile(temporaryFile, JSON.stringify(signups, null, 2), "utf8");
@@ -1110,9 +1186,24 @@ function updateScheduleOverride(signup, body) {
 async function serveStatic(request, response, pathname) {
   let requestedPath = pathname === "/" ? "/index.html" : pathname;
 
-  if (requestedPath === COORDINATOR_PAGE_PATH) {
-    requestedPath = "/ridglan-beagle-intake-coordinator-desk.html";
+  if ([COORDINATOR_PAGE_PATH, COORDINATOR_HTML_PATH].includes(requestedPath)) {
+    try {
+      const content = await readFile(COORDINATOR_FILE);
+      response.writeHead(200, {
+        "Content-Type": "text/html; charset=utf-8"
+      });
+      response.end(content);
+    } catch (error) {
+      if (error.code === "ENOENT" || error.code === "EISDIR") {
+        sendText(response, 404, "Not found");
+        return;
+      }
+
+      throw error;
+    }
+    return;
   }
+
   let decodedPath = "";
 
   try {
@@ -1355,28 +1446,36 @@ async function handleRequest(request, response) {
   sendText(response, 405, "Method not allowed");
 }
 
+function handleUnexpectedError(error, response) {
+  console.error(error);
+  sendJson(response, 500, { errors: ["Unexpected server error."] });
+}
+
 const server = http.createServer((request, response) => {
   handleRequest(request, response).catch((error) => {
-    console.error(error);
-    sendJson(response, 500, { errors: ["Unexpected server error."] });
+    handleUnexpectedError(error, response);
   });
 });
 
-let activePort = PORT;
+if (require.main === module) {
+  let activePort = PORT;
 
-server.on("error", (error) => {
-  if (error.code === "EADDRINUSE" && activePort < PORT + 50) {
-    activePort += 1;
-    console.log(`Port ${activePort - 1} is in use. Trying ${activePort}...`);
-    server.listen(activePort);
-    return;
-  }
+  server.on("error", (error) => {
+    if (error.code === "EADDRINUSE" && activePort < PORT + 50) {
+      activePort += 1;
+      console.log(`Port ${activePort - 1} is in use. Trying ${activePort}...`);
+      server.listen(activePort);
+      return;
+    }
 
-  throw error;
-});
+    throw error;
+  });
 
-server.listen(activePort, () => {
-  const address = server.address();
-  const port = typeof address === "object" && address ? address.port : activePort;
-  console.log(`Big Dog Ranch Rescue volunteer signup site running at http://localhost:${port}`);
-});
+  server.listen(activePort, () => {
+    const address = server.address();
+    const port = typeof address === "object" && address ? address.port : activePort;
+    console.log(`Big Dog Ranch Rescue volunteer signup site running at http://localhost:${port}`);
+  });
+}
+
+module.exports = { handleRequest, handleUnexpectedError };

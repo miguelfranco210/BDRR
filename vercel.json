@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/ridglan-beagle-intake-coordinator-desk",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/ridglan-beagle-intake-coordinator-desk.html",
+      "destination": "/api/index.js"
+    }
+  ]
+}

@@ -16,17 +16,31 @@ If that port is busy, the server automatically tries the next available port and
 
 ## Data
 
-Submitted contact cards are saved to `data/signups.json`. That file is ignored by git because it contains volunteer contact information.
+Submitted contact cards are saved to Supabase when `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` are configured. Local development falls back to `data/signups.json`; that file is ignored by git because it contains volunteer contact information.
 
-Coordinators can export a roster at `http://localhost:3000/api/signups.csv`. Before public deployment, set an admin code so exports require a code:
+Create the Supabase table with:
+
+```sql
+create table signups (
+	id uuid primary key,
+	submitted_at timestamptz not null,
+	record jsonb not null
+);
+```
+
+Coordinators can export a roster at `http://localhost:3000/api/signups.csv`. Before public deployment, set the backend environment variables:
 
 ```powershell
+$env:SUPABASE_URL = "https://your-project.supabase.co"
+$env:SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key"
 $env:ADMIN_USERNAME = "choose-a-private-username"
 $env:ADMIN_PASSWORD = "choose-a-private-password"
 npm start
 ```
 
 The coordinator review desk is available at `http://localhost:3000/ridglan-beagle-intake-coordinator-desk`. Keep this URL off the public signup page. Coordinators work through Review Queue for compact request triage, Task Placement for approved volunteer assignments, Denied for declined requests, Fill Needs for task/time-window gaps, and Schedule for final schedule review and persistent per-window edits or removals. Multi-shift volunteers are not automatically assigned to every selected window; coordinators assign or skip each exact window. The unique page name is convenience only; set `ADMIN_USERNAME` and `ADMIN_PASSWORD` before deployment to protect dashboard data, coordinator actions, and CSV exports.
+
+For Vercel, add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `ADMIN_USERNAME`, and `ADMIN_PASSWORD` in Project Settings > Environment Variables, then redeploy. The Supabase service role key must stay server-side only; do not place it in frontend code.
 
 From the Schedule tab, choose a day from Print day and use Save Day to PDF to open the browser print dialog with a letter-size schedule sheet. Choose Save as PDF or print from that dialog.
 
@@ -35,4 +49,4 @@ From the Schedule tab, choose a day from Print day and use Save Day to PDF to op
 - Use HTTPS because the form collects names, phone numbers, and email addresses.
 - Protect exports and any roster views with authentication.
 - Review the legal language with counsel before publishing.
-- For high-volume public use, replace the local JSON file with a database or hosted form backend.
+- Supabase is used for production persistence on Vercel because serverless deployments cannot rely on local file writes.
