@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Big Dog Ranch Rescue Intake Coordinator Desk</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="admin-page">
+  <main class="admin-shell">
+    <header class="admin-hero">
+      <p class="kicker">Coordinator review desk</p>
+      <h1>Ridglan Beagle Intake Requests</h1>
+      <p>Review volunteer requests, fill staffing needs from approved candidates, and use the schedule as the final working board.</p>
+    </header>
+
+    <section id="summaryBar" class="summary-bar" aria-live="polite"></section>
+
+    <nav class="admin-tabs" aria-label="Coordinator workflow">
+      <button class="admin-tab is-active" type="button" data-view="review">Review Queue</button>
+      <button class="admin-tab" type="button" data-view="placement">Task Placement</button>
+      <button class="admin-tab" type="button" data-view="denied">Denied</button>
+      <button class="admin-tab" type="button" data-view="needs">Fill Needs</button>
+      <button class="admin-tab" type="button" data-view="schedule">Schedule</button>
+    </nav>
+
+    <section id="reviewView" class="admin-panel admin-view is-active" aria-labelledby="requests-title">
+      <div class="admin-panel-heading">
+        <div>
+          <h2 id="requests-title">Review Queue</h2>
+          <p id="requests-copy">Approve or deny requests from a compact queue. Use Details to read the volunteer's full experience input before deciding.</p>
+        </div>
+      </div>
+      <div id="reviewGapPanel" class="review-gap-panel" aria-live="polite"></div>
+      <div class="need-filter-panel" aria-label="Filter review queue">
+        <label>
+          <span>Assignment</span>
+          <select id="reviewAssignmentFilter">
+            <option value="unassigned">Unassigned</option>
+            <option value="assigned">Assigned</option>
+            <option value="all">All requests</option>
+          </select>
+        </label>
+        <label>
+          <span>Time window</span>
+          <select id="reviewTimeFilter"></select>
+        </label>
+        <label>
+          <span>Preferred task</span>
+          <select id="reviewTaskFilter"></select>
+        </label>
+        <label>
+          <span>Search</span>
+          <input id="reviewSearch" type="search" placeholder="Name, phone, skill, or email">
+        </label>
+        <button id="clearReviewFilters" class="text-button" type="button">Clear</button>
+        <p id="reviewResultCount" class="filter-result-count" aria-live="polite"></p>
+      </div>
+      <div class="review-workspace">
+        <div>
+          <div id="reviewList" class="review-list" aria-live="polite"></div>
+          <button id="loadMoreReviews" class="text-button load-more-button" type="button">Load More</button>
+        </div>
+        <section id="requestDetail" class="detail-panel" aria-live="polite"></section>
+      </div>
+      <div id="placementBulkActions" class="placement-bulk-actions" hidden>
+        <button id="autoAssignRemaining" class="primary-button" type="button">Auto assign task to remaining approved volunteers</button>
+        <p id="autoAssignStatus" class="placement-bulk-status" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section id="needsView" class="admin-panel admin-view" aria-labelledby="needs-title">
+      <div class="admin-panel-heading">
+        <div>
+          <h2 id="needs-title">Fill Needs</h2>
+          <p>Start with the time window and task that is short, then assign approved candidates who fit that exact need.</p>
+        </div>
+      </div>
+      <div class="need-workspace">
+        <div id="needBoard" class="need-board" aria-live="polite"></div>
+        <aside id="candidatePanel" class="candidate-panel" aria-live="polite"></aside>
+      </div>
+    </section>
+
+    <section id="scheduleView" class="admin-panel admin-view" aria-labelledby="scheduler-title">
+      <div class="admin-panel-heading">
+        <div>
+          <h2 id="scheduler-title">Auto Scheduler</h2>
+          <p>Final working board generated from approved requests and manual staffing edits.</p>
+        </div>
+        <div class="schedule-print-controls">
+          <label>
+            <span>Print day</span>
+            <select id="scheduleDayFilter"></select>
+          </label>
+          <button id="printScheduleDay" class="primary-button compact-button" type="button">Save Day to PDF</button>
+          <button id="refreshSchedule" class="text-button" type="button">Refresh Schedule</button>
+        </div>
+      </div>
+      <div id="scheduleBoard" class="schedule-board" aria-live="polite"></div>
+      <div id="unscheduledList" class="unscheduled-list"></div>
+      <div id="printScheduleSheet" class="print-schedule-sheet" aria-hidden="true"></div>
+    </section>
+  </main>
+
+  <script src="/coordinator-desk.js" defer></script>
+</body>
+</html>

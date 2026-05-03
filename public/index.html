@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Big Dog Ranch Rescue Beagle Intake Volunteer Availability</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="topline">
+      <a href="https://www.bdrr.org/dog-blog">Dog Blog</a>
+      <a href="https://www.bdrr.org/volunteer">Volunteer</a>
+      <a href="https://www.bdrr.org/events">Events</a>
+      <a href="https://www.bdrr.org/adopt">Adopt</a>
+      <a href="https://www.bdrr.org/foster">Foster</a>
+      <a href="https://www.bdrr.org/contact">Contact</a>
+      <a class="donate-link" href="https://www.bdrr.org/donate">Donate</a>
+    </div>
+    <div class="brand-row">
+      <img class="brand-logo" src="https://static.wixstatic.com/media/934aa2_0eca5ce157104a66be9c1233bae88064~mv2.png/v1/fill/w_781,h_175,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/BDRR%20Logo%20Wood%20Panel-Primary.png" alt="Big Dog Ranch Rescue">
+      <p>Volunteer intake signup</p>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy">
+        <p class="kicker">Big Dog Ranch Rescue</p>
+        <h1 id="page-title">Help Welcome the Ridglan Beagles Into Their Next Chapter</h1>
+        <p>This volunteer intake process is organized by Big Dog Ranch Rescue for the beagles released through negotiations with Ridglan Farms. Volunteer crews are needed for intake, processing, cleaning, loading, clerical support, and calm dog care.</p>
+        <a class="hero-button" href="#signupForm">Send Your Availability</a>
+      </div>
+    </section>
+
+    <section class="briefing" aria-label="Volunteer briefing">
+      <div>
+        <span>Availability</span>
+        <strong>Monday - Wednesday</strong>
+        <p>9am-2pm, 2pm-9pm, and 5pm-9pm clean/prep windows</p>
+      </div>
+      <div>
+        <span>Thursday</span>
+        <strong>9am - 2pm</strong>
+        <p>Loader and clean-up crew availability, target crew 20</p>
+      </div>
+      <div>
+        <span>Questions</span>
+        <strong>Liz or Bree</strong>
+        <p>If unavailable, approach any Big Dog Ranch Rescue staff member.</p>
+      </div>
+      <div>
+        <span>Placement</span>
+        <strong>Outreach Will Confirm</strong>
+        <p>Select availability and task preferences; Big Dog Ranch Rescue confirms final role and report time.</p>
+      </div>
+    </section>
+
+    <section class="rules-band" aria-labelledby="critical-rules-title">
+      <p class="kicker">Required for all volunteers</p>
+      <h2 id="critical-rules-title">No medical barn photos, video, or audio. No public criticism or discussion of dog conditions, handling, care, or negotiations.</h2>
+      <p>Media may only be taken at the top barn when staff permits it. Shoes must be disinfected before entering work areas. Anyone currently fostering sick dogs should not apply for this intake at this time.</p>
+    </section>
+
+    <form id="signupForm" class="signup-form" novalidate>
+      <section class="form-section intro-card" aria-labelledby="signup-title">
+        <p class="kicker">Volunteer contact card</p>
+        <h2 id="signup-title">Tell Big Dog Ranch Rescue Outreach When You Can Help</h2>
+        <p>Submit one contact card and select every shift when you may be available. Big Dog Ranch Rescue outreach will contact volunteers before assigning a final role, report time, and placement.</p>
+      </section>
+
+      <section class="form-section schedule-panel" aria-labelledby="shift-title">
+        <h2 id="shift-title">Availability Windows</h2>
+        <p class="section-note">Choose every time window you could realistically be on site. These selections do not assign you to a role; Big Dog Ranch Rescue outreach will confirm the final report time and placement.</p>
+        <div id="shiftList" class="shift-list" aria-live="polite"></div>
+      </section>
+
+      <section class="form-section contact-section" aria-labelledby="contact-title">
+        <h2 id="contact-title">Volunteer Contact</h2>
+        <div class="field-grid">
+          <label>
+            <span>Name</span>
+            <input name="name" autocomplete="name" required>
+          </label>
+          <label>
+            <span>Phone</span>
+            <input name="phone" type="tel" autocomplete="tel" required>
+          </label>
+          <label class="full-width">
+            <span>Email</span>
+            <input name="email" type="email" autocomplete="email" required>
+          </label>
+        </div>
+      </section>
+
+      <section class="form-section roles-section" aria-labelledby="roles-title">
+        <h2 id="roles-title">Task Comfort & Preferences</h2>
+        <label class="any-role">
+          <input id="willingAllTasks" name="willingAllTasks" type="checkbox">
+          <span>
+            <strong>I am willing to help with any task Big Dog Ranch Rescue assigns.</strong>
+            <small>Task preferences help outreach place people well. Some assignments may depend on handling experience, physical comfort, or clerical skill.</small>
+          </span>
+        </label>
+        <p id="roleWindowNotice" class="role-window-notice" hidden>Only 5:00 PM - 9:00 PM windows are selected, so the evening cleaning and prep crew is the only available task preference for those times. Add a morning or afternoon window to choose other task preferences.</p>
+        <div id="roleList" class="role-list"></div>
+      </section>
+
+      <section class="form-section experience-section" aria-labelledby="experience-title">
+        <h2 id="experience-title">Relevant Experience</h2>
+        <label>
+          <span>Please note dog handling, kennel, rescue, medical, loading, cleaning, clerical, or other relevant experience. It is okay to write that you have no formal experience.</span>
+          <textarea name="dogExperience" rows="5" required placeholder="Example: foster volunteer, kennel care, leash handling, crate cleaning, intake paperwork, lifting/loading support, or no formal experience yet."></textarea>
+        </label>
+      </section>
+
+      <section class="form-section health-section" aria-labelledby="health-title">
+        <h2 id="health-title">Health Screening</h2>
+        <fieldset class="inline-fieldset">
+          <legend>Are you currently fostering sick dogs?</legend>
+          <label class="choice-line">
+            <input type="radio" name="currentlyFosteringSickDogs" value="no" required>
+            <span>No</span>
+          </label>
+          <label class="choice-line">
+            <input type="radio" name="currentlyFosteringSickDogs" value="yes" required>
+            <span>Yes</span>
+          </label>
+        </fieldset>
+        <p id="healthNotice" class="notice" hidden>For the safety of vulnerable dogs, volunteers currently fostering sick dogs should not apply for this intake at this time.</p>
+      </section>
+
+      <section class="form-section legal-section" aria-labelledby="legal-title">
+        <div class="legal-header">
+          <p class="kicker">Required compliance review</p>
+          <h2 id="legal-title">Required Acknowledgements</h2>
+          <p>Before submitting, every volunteer must review and acknowledge requirements tied to the negotiated release of the Ridglan Farms beagles.</p>
+          <ul class="legal-points">
+            <li>Keep non-public information confidential.</li>
+            <li>Do not make public criticism or comments about dog care, treatment, condition, handling, or negotiations.</li>
+            <li>No photos, video, or audio in the medical barn.</li>
+            <li>Follow biosecurity and Big Dog Ranch Rescue staff direction.</li>
+          </ul>
+        </div>
+
+        <details id="legalTerms" class="legal-copy">
+          <summary>Open Required Legal Terms</summary>
+          <p>Receiving Rescue Organization acknowledges that Big Dog Ranch Rescue is subject to binding confidentiality and non-disparagement obligations with third parties, including restrictions on making or causing to be made any public statements or communications that disparage or criticize, including without limitation statements regarding the care, treatment, condition, or handling of the Dogs.</p>
+          <p>Accordingly, Receiving Rescue Organization agrees as follows:</p>
+          <ul>
+            <li>It shall not make, publish, or communicate any public statements, or cause or permit any third party to make such statements, that could be construed as disparaging or critical, including without limitation statements regarding the care, treatment, condition, or handling of the Dogs;</li>
+            <li>It shall not disclose or disseminate any confidential or non-public information relating to Big Dog Ranch Rescue, its partners, operations, or the Dogs, except as required by law;</li>
+            <li>It shall ensure that its employees, agents, volunteers, contractors, media personnel, and any third parties acting on its behalf comply with this provision; and</li>
+            <li>It shall not take any action, including the release of statements, images, or media, that would cause Big Dog Ranch Rescue to be in breach of its contractual obligations.</li>
+          </ul>
+          <p>For the avoidance of doubt, Receiving Rescue Organization acknowledges and agrees that any statements, content, or communications made by Receiving Rescue Organization or any third party acting on its behalf shall not be deemed to have been made or "caused to be made" by Big Dog Ranch Rescue.</p>
+          <p>In the event of any uncertainty regarding compliance with this provision, Receiving Rescue Organization agrees to consult with Big Dog Ranch Rescue prior to making any public statement or releasing any content.</p>
+        </details>
+
+        <p id="legalReviewStatus" class="legal-review-status">Open the required terms above to unlock the acknowledgement checklist.</p>
+
+        <div class="ack-list">
+          <label class="ack-line">
+            <input type="checkbox" name="acknowledgement" value="termsReviewed" required>
+            <span>I opened and reviewed the required non-disparagement and confidentiality terms before submitting this form.</span>
+          </label>
+          <label class="ack-line">
+            <input type="checkbox" name="acknowledgement" value="nonDisparagement" required>
+            <span>I have read and agree to comply with the non-disparagement and confidentiality requirements above.</span>
+          </label>
+          <label class="ack-line">
+            <input type="checkbox" name="acknowledgement" value="noMedicalBarnMedia" required>
+            <span>I will not take photos, video, or audio in the medical barn, and I understand media is only permitted at the top/upper barn when staff permits it.</span>
+          </label>
+          <label class="ack-line">
+            <input type="checkbox" name="acknowledgement" value="shoeDisinfection" required>
+            <span>I will disinfect my shoes before entering work areas and follow all biosecurity directions from staff.</span>
+          </label>
+          <label class="ack-line">
+            <input type="checkbox" name="acknowledgement" value="healthScreening" required>
+            <span>I understand that if I am fostering sick dogs, I should not volunteer for this intake at this time because the dogs are vulnerable.</span>
+          </label>
+          <label class="ack-line">
+            <input type="checkbox" name="acknowledgement" value="staffDirection" required>
+            <span>If I have questions, I will ask Liz or Bree. If neither is available, I will approach any Big Dog Ranch Rescue staff member.</span>
+          </label>
+        </div>
+
+        <label class="legal-confirmation">
+          <span>Type <strong>I UNDERSTAND</strong> to confirm you understand these restrictions before sending your availability.</span>
+          <input id="legalConfirmation" name="legalConfirmation" autocomplete="off" required>
+        </label>
+      </section>
+
+      <section class="form-actions" aria-live="polite">
+        <button id="submitButton" class="primary-button" type="submit">Send Availability to Big Dog Ranch Rescue Outreach</button>
+        <p id="formMessage" class="form-message" role="status"></p>
+      </section>
+    </form>
+
+  </main>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
