@@ -112,8 +112,7 @@ function isEveningCleanPrepShiftId(shiftId) {
 }
 
 function hasOnlyEveningCleanPrepAvailability() {
-  const selectedShiftIds = getSelectedShiftIds();
-  return selectedShiftIds.length > 0 && selectedShiftIds.every(isEveningCleanPrepShiftId);
+  return false;
 }
 
 function getRolePreferenceInputs() {
@@ -125,10 +124,6 @@ function getSelectableRolePreferenceInputs() {
 }
 
 function syncWillingAllTasksFromRoles() {
-  if (hasOnlyEveningCleanPrepAvailability()) {
-    return;
-  }
-
   const willingAllTasks = form.querySelector("input[name='willingAllTasks']");
   const rolePreferenceInputs = getSelectableRolePreferenceInputs();
   const allRolesSelected = rolePreferenceInputs.length > 0 && rolePreferenceInputs.every((input) => input.checked);
@@ -144,27 +139,9 @@ function setAllSelectableRolePreferences(checked) {
 }
 
 function updateRoleAvailabilityLock() {
-  const onlyEveningCleanPrep = hasOnlyEveningCleanPrepAvailability();
-  const willingAllTasks = form.querySelector("input[name='willingAllTasks']");
-
-  if (willingAllTasks) {
-    willingAllTasks.checked = onlyEveningCleanPrep ? false : willingAllTasks.checked;
-    willingAllTasks.disabled = onlyEveningCleanPrep;
-    willingAllTasks.closest(".any-role")?.classList.toggle("is-locked", onlyEveningCleanPrep);
-  }
-
-  getRolePreferenceInputs().forEach((input) => {
-    const isEveningCleanPrep = input.value === EVENING_CLEAN_PREP_ROLE_ID;
-    input.checked = onlyEveningCleanPrep ? isEveningCleanPrep : input.checked;
-    input.disabled = onlyEveningCleanPrep && !isEveningCleanPrep;
-    input.closest(".role-option")?.classList.toggle("is-locked", onlyEveningCleanPrep && !isEveningCleanPrep);
-    input.closest(".role-option")?.classList.toggle("is-required-match", onlyEveningCleanPrep && isEveningCleanPrep);
-  });
-
   if (roleWindowNotice) {
-    roleWindowNotice.hidden = !onlyEveningCleanPrep;
+    roleWindowNotice.hidden = true;
   }
-
   syncWillingAllTasksFromRoles();
 }
 

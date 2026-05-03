@@ -14,11 +14,24 @@ const SUPABASE_SIGNUPS_TABLE = process.env.SUPABASE_SIGNUPS_TABLE || "signups";
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const EVENING_CLEAN_PREP_ROLE_ID = "evening-clean-prep";
+const THURSDAY_LOADER_CLEANUP_ROLE_ID = "thu-loader-cleanup";
 const COORDINATOR_PAGE_PATH = "/ridglan-beagle-intake-coordinator-desk";
 const COORDINATOR_HTML_PATH = "/ridglan-beagle-intake-coordinator-desk.html";
-const THURSDAY_LOADER_CLEANUP_ROLE_ID = "thu-loader-cleanup";
 const ADMIN_STATUSES = new Set(["pending", "approved", "denied"]);
 const GENERAL_ROLE_IDS = ["yard-sitter", "loader", "crate-cleaner", "stall-monitor", "clerical-intake"];
+const EVENING_CLEAN_PREP_SHIFT_IDS = new Set([
+  "mon-pm-2",
+  "tue-pm-2",
+  "wed-pm-2",
+  "thu-pm-2",
+  "mon-tue-overnight",
+  "tue-wed-overnight",
+  "wed-thu-overnight",
+  "tue-predawn",
+  "wed-predawn",
+  "thu-predawn"
+]);
+const THURSDAY_SHIFT_IDS = new Set(["thu-predawn", "thu-am-1", "thu-pm-1", "thu-pm-2"]);
 const ROLE_CAPACITY = {
   "yard-sitter": 6,
   loader: 8,
@@ -30,86 +43,24 @@ const ROLE_CAPACITY = {
 };
 
 const shifts = [
-  {
-    id: "mon-am",
-    day: "Monday",
-    date: "5/4/2026",
-    time: "9:00 AM - 2:00 PM",
-    max: 15,
-    focus: "Morning availability window"
-  },
-  {
-    id: "mon-pm",
-    day: "Monday",
-    date: "5/4/2026",
-    time: "2:00 PM - 9:00 PM",
-    max: 20,
-    focus: "Afternoon availability window"
-  },
-  {
-    id: "mon-clean-prep",
-    day: "Monday",
-    date: "5/4/2026",
-    time: "5:00 PM - 9:00 PM",
-    max: 10,
-    focus: "Evening clean/prep availability window"
-  },
-  {
-    id: "tue-am",
-    day: "Tuesday",
-    date: "5/5/2026",
-    time: "9:00 AM - 2:00 PM",
-    max: 15,
-    focus: "Morning availability window"
-  },
-  {
-    id: "tue-pm",
-    day: "Tuesday",
-    date: "5/5/2026",
-    time: "2:00 PM - 9:00 PM",
-    max: 20,
-    focus: "Afternoon availability window"
-  },
-  {
-    id: "tue-clean-prep",
-    day: "Tuesday",
-    date: "5/5/2026",
-    time: "5:00 PM - 9:00 PM",
-    max: 10,
-    focus: "Evening clean/prep availability window"
-  },
-  {
-    id: "wed-am",
-    day: "Wednesday",
-    date: "5/6/2026",
-    time: "9:00 AM - 2:00 PM",
-    max: 15,
-    focus: "Morning availability window"
-  },
-  {
-    id: "wed-pm",
-    day: "Wednesday",
-    date: "5/6/2026",
-    time: "2:00 PM - 9:00 PM",
-    max: 20,
-    focus: "Afternoon availability window"
-  },
-  {
-    id: "wed-clean-prep",
-    day: "Wednesday",
-    date: "5/6/2026",
-    time: "5:00 PM - 9:00 PM",
-    max: 10,
-    focus: "Evening clean/prep availability window"
-  },
-  {
-    id: "thu-am",
-    day: "Thursday",
-    date: "5/7/2026",
-    time: "9:00 AM - 2:00 PM",
-    max: 20,
-    focus: "Thursday loader and clean-up availability window"
-  }
+  { id: "mon-am-1", day: "Monday", date: "5/4/2026", time: "9:00 AM - 1:00 PM", max: 32, focus: "Monday morning availability window" },
+  { id: "mon-pm-1", day: "Monday", date: "5/4/2026", time: "1:00 PM - 5:00 PM", max: 35, focus: "Monday early afternoon availability window" },
+  { id: "mon-pm-2", day: "Monday", date: "5/4/2026", time: "5:00 PM - 9:00 PM", max: 26, focus: "Monday evening availability window" },
+  { id: "mon-tue-overnight", day: "Monday-Tuesday Overnight", date: "5/4-5/5/2026", time: "11:00 PM - 3:00 AM", max: 6, focus: "Monday-Tuesday overnight availability window" },
+  { id: "tue-predawn", day: "Tuesday", date: "5/5/2026", time: "3:00 AM - 7:00 AM", max: 6, focus: "Tuesday pre-dawn availability window" },
+  { id: "tue-am-1", day: "Tuesday", date: "5/5/2026", time: "9:00 AM - 1:00 PM", max: 25, focus: "Tuesday morning availability window" },
+  { id: "tue-pm-1", day: "Tuesday", date: "5/5/2026", time: "1:00 PM - 5:00 PM", max: 33, focus: "Tuesday early afternoon availability window" },
+  { id: "tue-pm-2", day: "Tuesday", date: "5/5/2026", time: "5:00 PM - 9:00 PM", max: 24, focus: "Tuesday evening availability window" },
+  { id: "tue-wed-overnight", day: "Tuesday-Wednesday Overnight", date: "5/5-5/6/2026", time: "11:00 PM - 3:00 AM", max: 6, focus: "Tuesday-Wednesday overnight availability window" },
+  { id: "wed-predawn", day: "Wednesday", date: "5/6/2026", time: "3:00 AM - 7:00 AM", max: 5, focus: "Wednesday pre-dawn availability window" },
+  { id: "wed-am-1", day: "Wednesday", date: "5/6/2026", time: "9:00 AM - 1:00 PM", max: 25, focus: "Wednesday morning availability window" },
+  { id: "wed-pm-1", day: "Wednesday", date: "5/6/2026", time: "1:00 PM - 5:00 PM", max: 29, focus: "Wednesday early afternoon availability window" },
+  { id: "wed-pm-2", day: "Wednesday", date: "5/6/2026", time: "5:00 PM - 9:00 PM", max: 28, focus: "Wednesday evening availability window" },
+  { id: "wed-thu-overnight", day: "Wednesday-Thursday Overnight", date: "5/6-5/7/2026", time: "11:00 PM - 3:00 AM", max: 9, focus: "Wednesday-Thursday overnight availability window" },
+  { id: "thu-predawn", day: "Thursday", date: "5/7/2026", time: "3:00 AM - 7:00 AM", max: 8, focus: "Thursday pre-dawn availability window" },
+  { id: "thu-am-1", day: "Thursday", date: "5/7/2026", time: "9:00 AM - 1:00 PM", max: 17, focus: "Thursday morning availability window" },
+  { id: "thu-pm-1", day: "Thursday", date: "5/7/2026", time: "1:00 PM - 5:00 PM", max: 13, focus: "Thursday early afternoon availability window" },
+  { id: "thu-pm-2", day: "Thursday", date: "5/7/2026", time: "5:00 PM - 9:00 PM", max: 11, focus: "Thursday evening availability window" }
 ];
 
 const roles = [
@@ -147,13 +98,13 @@ const roles = [
     id: "evening-clean-prep",
     label: "Evening cleaning and prep crew",
     need: "10 needed",
-    description: "Clean work areas, reset supplies, prepare crates/stalls, and help the next day start smoothly. This is hands-on cleaning and setup work."
+    description: "Clean work areas, reset supplies, prepare crates/stalls, and help the next day start smoothly. Available on evening and overnight windows."
   },
   {
     id: "thu-loader-cleanup",
     label: "Thursday loader and clean-up crew",
     need: "20 needed",
-    description: "Support Thursday morning loading, cleanup, breakdown, and staff-directed wrap-up tasks. Good for flexible volunteers comfortable staying active."
+    description: "Support Thursday loading, cleanup, breakdown, and staff-directed wrap-up tasks. Available on Thursday windows."
   }
 ];
 
@@ -282,15 +233,14 @@ function getRolePreferenceIds(signup) {
 }
 
 function getEligibleRoleIdsForShift(shiftId) {
-  if (isEveningCleanPrepShiftId(shiftId)) {
-    return [EVENING_CLEAN_PREP_ROLE_ID];
+  const result = [...GENERAL_ROLE_IDS];
+  if (EVENING_CLEAN_PREP_SHIFT_IDS.has(shiftId)) {
+    result.push(EVENING_CLEAN_PREP_ROLE_ID);
   }
-
-  if (shiftId === "thu-am") {
-    return [THURSDAY_LOADER_CLEANUP_ROLE_ID];
+  if (THURSDAY_SHIFT_IDS.has(shiftId)) {
+    result.push(THURSDAY_LOADER_CLEANUP_ROLE_ID);
   }
-
-  return GENERAL_ROLE_IDS;
+  return result;
 }
 
 function getEligibleRoleIdsForSignup(signup) {
@@ -413,7 +363,7 @@ function cleanLongText(value, maxLength = 2000) {
 }
 
 function isEveningCleanPrepShiftId(shiftId) {
-  return typeof shiftId === "string" && shiftId.endsWith("-clean-prep");
+  return EVENING_CLEAN_PREP_SHIFT_IDS.has(shiftId);
 }
 
 function validateSignup(body, existingSignups) {
@@ -425,7 +375,6 @@ function validateSignup(body, existingSignups) {
   let rolePreferences = Array.isArray(body.rolePreferences)
     ? body.rolePreferences.filter((roleId) => roleIds.has(roleId))
     : [];
-  const onlyEveningCleanPrepAvailability = selectedShiftIds.length > 0 && selectedShiftIds.every(isEveningCleanPrepShiftId);
 
   const name = cleanText(body.name, 120);
   const phone = cleanText(body.phone, 40);
@@ -435,11 +384,6 @@ function validateSignup(body, existingSignups) {
   let willingAllTasks = body.willingAllTasks === true || body.anyRole === true;
   const currentlyFosteringSickDogs = body.currentlyFosteringSickDogs === true;
   const phoneDigits = phone.replace(/\D/g, "");
-
-  if (onlyEveningCleanPrepAvailability) {
-    rolePreferences = [EVENING_CLEAN_PREP_ROLE_ID];
-    willingAllTasks = false;
-  }
 
   if (!name) {
     errors.push("Name is required.");
