@@ -1498,5 +1498,3 @@ if (require.main === module) {
 }
 
 module.exports = vercelHandler;
-module.exports.handleRequest = handleRequest;
-module.exports.handleUnexpectedError = handleUnexpectedError;
