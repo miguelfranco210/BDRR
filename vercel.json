@@ -1,5 +1,19 @@
 {
   "version": 2,
+  "functions": {
+    "api/**/*.js": {
+      "includeFiles": [
+        "public/**",
+        "private/**"
+      ]
+    },
+    "server.js": {
+      "includeFiles": [
+        "public/**",
+        "private/**"
+      ]
+    }
+  },
   "rewrites": [
     {
       "source": "/ridglan-beagle-intake-coordinator-desk",

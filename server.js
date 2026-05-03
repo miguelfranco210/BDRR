@@ -1481,6 +1481,12 @@ const server = http.createServer((request, response) => {
   });
 });
 
+function vercelHandler(request, response) {
+  handleRequest(request, response).catch((error) => {
+    handleUnexpectedError(error, response);
+  });
+}
+
 if (require.main === module) {
   let activePort = PORT;
 
@@ -1502,4 +1508,6 @@ if (require.main === module) {
   });
 }
 
-module.exports = { handleRequest, handleUnexpectedError };
+module.exports = vercelHandler;
+module.exports.handleRequest = handleRequest;
+module.exports.handleUnexpectedError = handleUnexpectedError;
