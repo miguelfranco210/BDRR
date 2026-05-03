@@ -806,6 +806,8 @@ function renderReviewRow(signup) {
     actions.append(renderReviewActionButton("Back to Review", "text-button mini-button", () => updateSignup(signup.id, "pending", "")));
   }
 
+  actions.append(renderReviewActionButton("Delete", "danger-button mini-button", () => deleteSignup(signup.id, signup.name)));
+
   const detailsIsOpen = signup.id === state.selectedSignupId;
   actions.append(renderReviewActionButton(
     detailsIsOpen ? "Close" : "Details",
@@ -1162,6 +1164,8 @@ function buildRequestDetailCard(signup) {
   } else if (state.activeView === "denied") {
     actions.append(renderReviewActionButton("Back to Review Queue", "text-button", () => updateSignup(signup.id, "pending", "")));
   }
+
+  actions.append(renderReviewActionButton("Delete permanently", "danger-button", () => deleteSignup(signup.id, signup.name)));
 
   const body = document.createElement("div");
   body.className = "request-detail-body";
@@ -1765,6 +1769,32 @@ async function updateSignup(signupId, action, assignedRoleId) {
     renderDashboard(dashboard);
   } catch (error) {
     showStatusMessage(error.message || "Request could not be updated.", "error");
+  }
+}
+
+async function deleteSignup(signupId, signupName) {
+  const label = signupName ? `"${signupName}"` : "this signup";
+  const confirmed = window.confirm(`Permanently delete ${label}? This removes the record from the database and cannot be undone. The volunteer can resubmit if needed.`);
+  if (!confirmed) {
+    return;
+  }
+
+  try {
+    const dashboard = await fetchJson("/api/admin/signup-delete", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        adminCode: state.adminCode,
+        signupId
+      })
+    });
+    if (state.selectedSignupId === signupId) {
+      state.selectedSignupId = "";
+    }
+    renderDashboard(dashboard);
+    showStatusMessage(`Deleted ${label}.`, "success");
+  } catch (error) {
+    showStatusMessage(error.message || "Signup could not be deleted.", "error");
   }
 }
 

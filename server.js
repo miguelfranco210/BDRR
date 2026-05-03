@@ -1261,6 +1261,51 @@ async function handleRequest(request, response) {
     return;
   }
 
+  if (request.method === "POST" && requestUrl.pathname === "/api/admin/signup-delete") {
+    let body;
+
+    try {
+      body = await readJsonBody(request);
+    } catch (error) {
+      sendJson(response, 400, { errors: [error.message] });
+      return;
+    }
+
+    if (!isAdminAuthorized(requestUrl, body, request)) {
+      sendAdminUnauthorized(response);
+      return;
+    }
+
+    if (!body.signupId || typeof body.signupId !== "string") {
+      sendJson(response, 400, { errors: ["signupId is required."] });
+      return;
+    }
+
+    await queueSignupWrite(async () => {
+      const signups = (await readSignups()).map(normalizeSignup);
+      const signupIndex = signups.findIndex((signup) => signup.id === body.signupId);
+
+      if (signupIndex === -1) {
+        sendJson(response, 404, { errors: ["Signup request was not found."] });
+        return;
+      }
+
+      const removed = signups.splice(signupIndex, 1)[0];
+
+      if (useSupabaseStorage()) {
+        await requestSupabase(`?id=eq.${encodeURIComponent(removed.id)}`, {
+          method: "DELETE",
+          headers: { Prefer: "return=minimal" }
+        });
+      } else {
+        await writeSignups(signups);
+      }
+
+      sendJson(response, 200, getAdminDashboard(signups));
+    });
+    return;
+  }
+
   if (request.method === "POST" && requestUrl.pathname === "/api/admin/schedule-action") {
     let body;
 
