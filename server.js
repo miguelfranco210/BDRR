@@ -20,18 +20,11 @@ const COORDINATOR_HTML_PATH = "/ridglan-beagle-intake-coordinator-desk.html";
 const ADMIN_STATUSES = new Set(["pending", "approved", "denied"]);
 const GENERAL_ROLE_IDS = ["yard-sitter", "loader", "crate-cleaner", "stall-monitor", "clerical-intake"];
 const EVENING_CLEAN_PREP_SHIFT_IDS = new Set([
-  "mon-pm-2",
-  "tue-pm-2",
-  "wed-pm-2",
-  "thu-pm-2",
-  "mon-tue-overnight",
-  "tue-wed-overnight",
-  "wed-thu-overnight",
   "tue-predawn",
   "wed-predawn",
   "thu-predawn"
 ]);
-const THURSDAY_SHIFT_IDS = new Set(["thu-predawn", "thu-am-1", "thu-pm-1", "thu-pm-2"]);
+const THURSDAY_SHIFT_IDS = new Set(["thu-predawn", "thu-am-1", "thu-pm-1"]);
 const ROLE_CAPACITY = {
   "yard-sitter": 6,
   loader: 8,
@@ -45,22 +38,15 @@ const ROLE_CAPACITY = {
 const shifts = [
   { id: "mon-am-1", day: "Monday", date: "5/4/2026", time: "9:00 AM - 1:00 PM", max: 32, focus: "Monday morning availability window" },
   { id: "mon-pm-1", day: "Monday", date: "5/4/2026", time: "1:00 PM - 5:00 PM", max: 35, focus: "Monday early afternoon availability window" },
-  { id: "mon-pm-2", day: "Monday", date: "5/4/2026", time: "5:00 PM - 9:00 PM", max: 26, focus: "Monday evening availability window" },
-  { id: "mon-tue-overnight", day: "Monday-Tuesday Overnight", date: "5/4-5/5/2026", time: "11:00 PM - 3:00 AM", max: 6, focus: "Monday-Tuesday overnight availability window" },
   { id: "tue-predawn", day: "Tuesday", date: "5/5/2026", time: "3:00 AM - 7:00 AM", max: 6, focus: "Tuesday pre-dawn availability window" },
   { id: "tue-am-1", day: "Tuesday", date: "5/5/2026", time: "9:00 AM - 1:00 PM", max: 25, focus: "Tuesday morning availability window" },
   { id: "tue-pm-1", day: "Tuesday", date: "5/5/2026", time: "1:00 PM - 5:00 PM", max: 33, focus: "Tuesday early afternoon availability window" },
-  { id: "tue-pm-2", day: "Tuesday", date: "5/5/2026", time: "5:00 PM - 9:00 PM", max: 24, focus: "Tuesday evening availability window" },
-  { id: "tue-wed-overnight", day: "Tuesday-Wednesday Overnight", date: "5/5-5/6/2026", time: "11:00 PM - 3:00 AM", max: 6, focus: "Tuesday-Wednesday overnight availability window" },
   { id: "wed-predawn", day: "Wednesday", date: "5/6/2026", time: "3:00 AM - 7:00 AM", max: 5, focus: "Wednesday pre-dawn availability window" },
   { id: "wed-am-1", day: "Wednesday", date: "5/6/2026", time: "9:00 AM - 1:00 PM", max: 25, focus: "Wednesday morning availability window" },
   { id: "wed-pm-1", day: "Wednesday", date: "5/6/2026", time: "1:00 PM - 5:00 PM", max: 29, focus: "Wednesday early afternoon availability window" },
-  { id: "wed-pm-2", day: "Wednesday", date: "5/6/2026", time: "5:00 PM - 9:00 PM", max: 28, focus: "Wednesday evening availability window" },
-  { id: "wed-thu-overnight", day: "Wednesday-Thursday Overnight", date: "5/6-5/7/2026", time: "11:00 PM - 3:00 AM", max: 9, focus: "Wednesday-Thursday overnight availability window" },
   { id: "thu-predawn", day: "Thursday", date: "5/7/2026", time: "3:00 AM - 7:00 AM", max: 8, focus: "Thursday pre-dawn availability window" },
   { id: "thu-am-1", day: "Thursday", date: "5/7/2026", time: "9:00 AM - 1:00 PM", max: 17, focus: "Thursday morning availability window" },
-  { id: "thu-pm-1", day: "Thursday", date: "5/7/2026", time: "1:00 PM - 5:00 PM", max: 13, focus: "Thursday early afternoon availability window" },
-  { id: "thu-pm-2", day: "Thursday", date: "5/7/2026", time: "5:00 PM - 9:00 PM", max: 11, focus: "Thursday evening availability window" }
+  { id: "thu-pm-1", day: "Thursday", date: "5/7/2026", time: "1:00 PM - 5:00 PM", max: 13, focus: "Thursday early afternoon availability window" }
 ];
 
 const roles = [
