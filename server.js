@@ -2,10 +2,10 @@ const http = require("http");
 const path = require("path");
 const crypto = require("crypto");
 const { mkdir, readFile, writeFile, rename } = require("fs/promises");
+const coordinatorPageHtml = require("./private/coordinator-page");
 
 const PORT = Number(process.env.PORT) || 3000;
 const PUBLIC_DIR = path.join(__dirname, "public");
-const PRIVATE_DIR = path.join(__dirname, "private");
 const DATA_DIR = path.join(__dirname, "data");
 const SIGNUPS_FILE = process.env.SIGNUPS_FILE || path.join(DATA_DIR, "signups.json");
 const SUPABASE_URL = (process.env.SUPABASE_URL || "").replace(/\/+$/, "");
@@ -16,7 +16,6 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "";
 const EVENING_CLEAN_PREP_ROLE_ID = "evening-clean-prep";
 const COORDINATOR_PAGE_PATH = "/ridglan-beagle-intake-coordinator-desk";
 const COORDINATOR_HTML_PATH = "/ridglan-beagle-intake-coordinator-desk.html";
-const COORDINATOR_FILE = path.join(PRIVATE_DIR, "ridglan-beagle-intake-coordinator-desk.html");
 const THURSDAY_LOADER_CLEANUP_ROLE_ID = "thu-loader-cleanup";
 const ADMIN_STATUSES = new Set(["pending", "approved", "denied"]);
 const GENERAL_ROLE_IDS = ["yard-sitter", "loader", "crate-cleaner", "stall-monitor", "clerical-intake"];
@@ -1175,20 +1174,10 @@ async function serveStatic(request, response, pathname) {
   let requestedPath = pathname === "/" ? "/index.html" : pathname;
 
   if ([COORDINATOR_PAGE_PATH, COORDINATOR_HTML_PATH].includes(requestedPath)) {
-    try {
-      const content = await readFile(COORDINATOR_FILE);
-      response.writeHead(200, {
-        "Content-Type": "text/html; charset=utf-8"
-      });
-      response.end(content);
-    } catch (error) {
-      if (error.code === "ENOENT" || error.code === "EISDIR") {
-        sendText(response, 404, "Not found");
-        return;
-      }
-
-      throw error;
-    }
+    response.writeHead(200, {
+      "Content-Type": "text/html; charset=utf-8"
+    });
+    response.end(coordinatorPageHtml);
     return;
   }
 
