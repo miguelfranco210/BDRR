@@ -68,6 +68,7 @@ const shifts = [
   { id: "thu-pm-2", day: "Thursday", date: "5/7/2026", time: "5:00 PM - 9:00 PM", max: 11, focus: "Thursday evening availability window" },
   { id: "thu-fri-overnight", day: "Thursday-Friday Overnight", date: "5/7-5/8/2026", time: "11:00 PM - 3:00 AM", max: 6, focus: "Thursday-Friday overnight availability window" },
   { id: "fri-predawn", day: "Friday", date: "5/8/2026", time: "3:00 AM - 7:00 AM", max: 6, focus: "Friday pre-dawn availability window" },
+  { id: "fri-am-early", day: "Friday", date: "5/8/2026", time: "6:00 AM - 9:00 AM", max: 8, focus: "Friday early-morning availability window" },
   { id: "fri-am-1", day: "Friday", date: "5/8/2026", time: "9:00 AM - 1:00 PM", max: 15, focus: "Friday morning availability window" }
 ];
 
