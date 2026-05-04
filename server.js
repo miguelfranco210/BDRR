@@ -1381,6 +1381,14 @@ async function handleRequest(request, response) {
   }
 
   if (request.method === "POST" && requestUrl.pathname === "/api/admin/schedule-action") {
+    let body;
+
+    try {
+      body = await readJsonBody(request);
+    } catch (error) {
+      sendJson(response, 400, { errors: [error.message] });
+      return;
+    }
 
     if (!isAdminAuthorized(requestUrl, body, request)) {
       sendAdminUnauthorized(response);
