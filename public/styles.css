@@ -1412,6 +1412,23 @@ code {
   gap: 8px;
 }
 
+.window-add-row {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding: 11px;
+  border: 1px dashed var(--line);
+  background: #fbf6ec;
+}
+
+.window-add-row .window-add-select {
+  flex: 1 1 240px;
+  padding: 6px 8px;
+}
+
 .window-assignment-row {
   display: grid;
   gap: 10px;

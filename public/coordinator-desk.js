@@ -1104,6 +1104,40 @@ function renderWindowAssignmentControls(signup) {
     wrapper.append(row);
   });
 
+  if (signup.status === "approved") {
+    const availableShifts = state.dashboard.shifts.filter((shift) => !signup.shiftIds.includes(shift.id));
+    if (availableShifts.length > 0) {
+      const addRow = document.createElement("div");
+      addRow.className = "window-add-row";
+      const label = document.createElement("strong");
+      label.textContent = "Add another time window";
+      const select = document.createElement("select");
+      select.className = "window-add-select";
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "Select a window to add...";
+      select.append(placeholder);
+      availableShifts.forEach((shift) => {
+        const option = document.createElement("option");
+        option.value = shift.id;
+        option.textContent = getShiftDisplayLabel(shift);
+        select.append(option);
+      });
+      const addButton = document.createElement("button");
+      addButton.type = "button";
+      addButton.className = "primary-button compact-button";
+      addButton.textContent = "Add Window";
+      addButton.addEventListener("click", () => {
+        if (!select.value) {
+          return;
+        }
+        addShiftToSignup(signup.id, select.value);
+      });
+      addRow.append(label, select, addButton);
+      wrapper.append(addRow);
+    }
+  }
+
   return wrapper;
 }
 
@@ -1779,6 +1813,25 @@ async function updateSignup(signupId, action, assignedRoleId) {
     renderDashboard(dashboard);
   } catch (error) {
     showStatusMessage(error.message || "Request could not be updated.", "error");
+  }
+}
+
+async function addShiftToSignup(signupId, shiftId) {
+  try {
+    const dashboard = await fetchJson("/api/admin/signup-add-shift", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        adminCode: state.adminCode,
+        signupId,
+        shiftId
+      })
+    });
+    state.selectedSignupId = signupId;
+    renderDashboard(dashboard);
+    showStatusMessage(`Added time window.`, "success");
+  } catch (error) {
+    showStatusMessage(error.message || "Window could not be added.", "error");
   }
 }
 

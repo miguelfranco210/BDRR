@@ -1328,7 +1328,7 @@ async function handleRequest(request, response) {
     return;
   }
 
-  if (request.method === "POST" && requestUrl.pathname === "/api/admin/schedule-action") {
+  if (request.method === "POST" && requestUrl.pathname === "/api/admin/signup-add-shift") {
     let body;
 
     try {
@@ -1337,6 +1337,49 @@ async function handleRequest(request, response) {
       sendJson(response, 400, { errors: [error.message] });
       return;
     }
+
+    if (!isAdminAuthorized(requestUrl, body, request)) {
+      sendAdminUnauthorized(response);
+      return;
+    }
+
+    if (!body.signupId || typeof body.signupId !== "string") {
+      sendJson(response, 400, { errors: ["signupId is required."] });
+      return;
+    }
+
+    if (!body.shiftId || !getShiftById(body.shiftId)) {
+      sendJson(response, 400, { errors: ["A valid shiftId is required."] });
+      return;
+    }
+
+    await queueSignupWrite(async () => {
+      const signups = (await readSignups()).map(normalizeSignup);
+      const signupIndex = signups.findIndex((signup) => signup.id === body.signupId);
+
+      if (signupIndex === -1) {
+        sendJson(response, 404, { errors: ["Signup request was not found."] });
+        return;
+      }
+
+      const target = signups[signupIndex];
+      const currentShiftIds = Array.isArray(target.shiftIds) ? target.shiftIds : [];
+
+      if (currentShiftIds.includes(body.shiftId)) {
+        sendJson(response, 200, getAdminDashboard(signups));
+        return;
+      }
+
+      target.shiftIds = [...currentShiftIds, body.shiftId];
+      target.updatedAt = new Date().toISOString();
+      signups[signupIndex] = target;
+      await writeSignups(signups);
+      sendJson(response, 200, getAdminDashboard(signups));
+    });
+    return;
+  }
+
+  if (request.method === "POST" && requestUrl.pathname === "/api/admin/schedule-action") {
 
     if (!isAdminAuthorized(requestUrl, body, request)) {
       sendAdminUnauthorized(response);
