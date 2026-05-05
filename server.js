@@ -358,20 +358,13 @@ function getAvailability(signups) {
   return shifts.map((shift) => {
     const count = counts[shift.id] || 0;
     const target = shift.max;
-    const eligibleRoleIds = getEligibleRoleIdsForShift(shift.id);
-    const roleCounts = assignmentsByShift.get(shift.id) || {};
-    const allRolesFilled = eligibleRoleIds.length > 0
-      && eligibleRoleIds.every((roleId) => {
-        const roleTarget = ROLE_CAPACITY[roleId] || shift.max;
-        const assigned = roleCounts[roleId] || 0;
-        return roleTarget > 0 && assigned >= roleTarget;
-      });
 
     return {
       ...shift,
       count,
       target,
-      full: allRolesFilled
+      // Capacity lock is intentionally disabled until final specifications are received.
+      full: false
     };
   });
 }
@@ -431,14 +424,8 @@ function validateSignup(body, existingSignups) {
     errors.push("Please choose at least one shift when you may be available.");
   }
 
-  const availability = getAvailability(existingSignups);
-  const availabilityById = new Map(availability.map((shift) => [shift.id, shift]));
-  const fullSelected = selectedShiftIds.filter((shiftId) => availabilityById.get(shiftId)?.full);
-
-  if (fullSelected.length > 0) {
-    const labels = fullSelected.map((shiftId) => getShiftLabel(shiftId) || shiftId);
-    errors.push(`The following availability windows are at capacity and can no longer accept new signups: ${labels.join("; ")}. Please choose another time window.`);
-  }
+  // Capacity lock is intentionally disabled until final specifications are received.
+  // Re-enable by restoring the getAvailability().full check here and in public/app.js.
 
   if (!dogExperience) {
     errors.push("Please describe your dog handling experience, even if you have none.");
