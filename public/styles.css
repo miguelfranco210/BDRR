@@ -428,6 +428,22 @@ main {
   line-height: 1.25;
 }
 
+.shift-option.is-full {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #f3ece1;
+  border-color: #c9b48a;
+}
+
+.shift-option.is-full input[type="checkbox"] {
+  cursor: not-allowed;
+}
+
+.shift-option.is-full .shift-capacity {
+  background: #b04a3c;
+  color: #fff;
+}
+
 .role-need {
   display: block;
   margin: 5px 0 8px;

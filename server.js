@@ -345,12 +345,13 @@ function getAvailability(signups) {
 
   return shifts.map((shift) => {
     const count = counts[shift.id] || 0;
+    const target = shift.max;
 
     return {
       ...shift,
       count,
-      target: shift.max,
-      full: false
+      target,
+      full: target > 0 && count >= target
     };
   });
 }
@@ -408,6 +409,15 @@ function validateSignup(body, existingSignups) {
 
   if (selectedShiftIds.length === 0) {
     errors.push("Please choose at least one shift when you may be available.");
+  }
+
+  const availability = getAvailability(existingSignups);
+  const availabilityById = new Map(availability.map((shift) => [shift.id, shift]));
+  const fullSelected = selectedShiftIds.filter((shiftId) => availabilityById.get(shiftId)?.full);
+
+  if (fullSelected.length > 0) {
+    const labels = fullSelected.map((shiftId) => getShiftLabel(shiftId) || shiftId);
+    errors.push(`The following availability windows are at capacity and can no longer accept new signups: ${labels.join("; ")}. Please choose another time window.`);
   }
 
   if (!dogExperience) {

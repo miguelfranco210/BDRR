@@ -36,11 +36,19 @@ function renderShifts() {
   state.shifts.forEach((shift) => {
     const label = document.createElement("label");
     label.className = "shift-option";
+    if (shift.full) {
+      label.classList.add("is-full");
+    }
 
     const input = document.createElement("input");
     input.type = "checkbox";
     input.name = "shiftIds";
     input.value = shift.id;
+    if (shift.full) {
+      input.disabled = true;
+      input.checked = false;
+      input.setAttribute("aria-disabled", "true");
+    }
 
     const content = document.createElement("span");
 
@@ -62,7 +70,9 @@ function renderShifts() {
 
     const capacity = document.createElement("span");
     capacity.className = "shift-capacity";
-    capacity.textContent = `Target crew ${shift.target || shift.max}`;
+    capacity.textContent = shift.full
+      ? "At capacity — please choose another time window"
+      : `Target crew ${shift.target || shift.max}`;
 
     content.append(day, date, time, focus, capacity);
     label.append(input, content);
