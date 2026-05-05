@@ -343,52 +343,18 @@ function getAvailability(signups) {
     return totals;
   }, {});
 
-  // Per-shift, per-role raw interest counts. A volunteer who picked a shift contributes
-  // to every role they expressed preference for (or every eligible role if they marked
-  // willing-to-do-anything). A shift is only considered "full" when every eligible role
-  // bucket has reached its target capacity.
-  const roleLoadsByShift = shifts.reduce((result, shift) => {
-    const eligibleRoleIds = getEligibleRoleIdsForShift(shift.id);
-    result[shift.id] = eligibleRoleIds.reduce((roleResult, roleId) => {
-      roleResult[roleId] = { count: 0, target: ROLE_CAPACITY[roleId] || shift.max };
-      return roleResult;
-    }, {});
-    return result;
-  }, {});
-
-  signups.forEach((rawSignup) => {
-    if (rawSignup && rawSignup.status === "denied") {
-      return;
-    }
-
-    const shiftIds = Array.isArray(rawSignup.shiftIds)
-      ? rawSignup.shiftIds
-      : [rawSignup.shiftId].filter(Boolean);
-    const rolePreferences = Array.isArray(rawSignup.rolePreferences) ? rawSignup.rolePreferences : [];
-    const willingAll = rawSignup.willingAllTasks === true || rawSignup.anyRole === true;
-
-    shiftIds.forEach((shiftId) => {
-      const roleLoads = roleLoadsByShift[shiftId];
-      if (!roleLoads) return;
-
-      const eligibleRoleIds = Object.keys(roleLoads);
-      const targetRoleIds = willingAll
-        ? eligibleRoleIds
-        : rolePreferences.filter((roleId) => eligibleRoleIds.includes(roleId));
-
-      targetRoleIds.forEach((roleId) => {
-        roleLoads[roleId].count += 1;
-      });
-    });
-  });
+  // A window is "full" only when every eligible role bucket has reached its target
+  // assigned count (same metric the coordinator desk uses to display "Filled").
+  // Partially-staffed windows with any open role remain selectable on the landing page.
+  const bucketLoads = getBucketLoads(signups);
 
   return shifts.map((shift) => {
     const count = counts[shift.id] || 0;
     const target = shift.max;
-    const roleLoads = roleLoadsByShift[shift.id] || {};
+    const roleLoads = bucketLoads[shift.id] || {};
     const roleEntries = Object.values(roleLoads);
     const allRolesFilled = roleEntries.length > 0
-      && roleEntries.every((entry) => entry.target > 0 && entry.count >= entry.target);
+      && roleEntries.every((entry) => entry.target > 0 && entry.assigned >= entry.target);
 
     return {
       ...shift,
