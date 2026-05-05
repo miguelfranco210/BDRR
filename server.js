@@ -343,18 +343,29 @@ function getAvailability(signups) {
     return totals;
   }, {});
 
-  // A window is "full" only when every eligible role bucket has reached its target
-  // assigned count (same metric the coordinator desk uses to display "Filled").
-  // Partially-staffed windows with any open role remain selectable on the landing page.
-  const bucketLoads = getBucketLoads(signups);
+  // Use the same auto-scheduled assignment counts the coordinator desk uses to display
+  // "Filled". A window is locked only when every eligible role bucket has been filled
+  // to its target. Partially-staffed windows remain selectable on the landing page.
+  const schedule = generateAutoSchedule(signups);
+  const assignmentsByShift = new Map(schedule.shifts.map((shiftSchedule) => {
+    const roleCounts = {};
+    shiftSchedule.assignments.forEach((assignment) => {
+      roleCounts[assignment.roleId] = (roleCounts[assignment.roleId] || 0) + 1;
+    });
+    return [shiftSchedule.id, roleCounts];
+  }));
 
   return shifts.map((shift) => {
     const count = counts[shift.id] || 0;
     const target = shift.max;
-    const roleLoads = bucketLoads[shift.id] || {};
-    const roleEntries = Object.values(roleLoads);
-    const allRolesFilled = roleEntries.length > 0
-      && roleEntries.every((entry) => entry.target > 0 && entry.assigned >= entry.target);
+    const eligibleRoleIds = getEligibleRoleIdsForShift(shift.id);
+    const roleCounts = assignmentsByShift.get(shift.id) || {};
+    const allRolesFilled = eligibleRoleIds.length > 0
+      && eligibleRoleIds.every((roleId) => {
+        const roleTarget = ROLE_CAPACITY[roleId] || shift.max;
+        const assigned = roleCounts[roleId] || 0;
+        return roleTarget > 0 && assigned >= roleTarget;
+      });
 
     return {
       ...shift,
